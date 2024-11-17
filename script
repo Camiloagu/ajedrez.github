@@ -1,0 +1,103 @@
+const chessboard = document.getElementById('chessboard');
+const timerDisplay = document.getElementById('time');
+const whiteScoreDisplay = document.getElementById('whiteScore');
+const blackScoreDisplay = document.getElementById('blackScore');
+let timeElapsed = 0;
+let currentPlayer = 'white';
+let interval;
+let whiteScore = 0;
+let blackScore = 0;
+
+const initialPosition = [
+    '♖', '♘', '♗', '♕', '♔', '♗', '♘', '♖',
+    '♟', '♟', '♟', '♟', '♟', '♟', '♟', '♟',
+    '', '', '', '', '', '', '', '',
+    '', '', '', '', '', '', '', '',
+    '', '', '', '', '', '', '', '',
+    '', '', '', '', '', '', '', '',
+    '♙', '♙', '♙', '♙', '♙', '♙', '♙', '♙',
+    '♖', '♘', '♗', '♕', '♔', '♗', '♘', '♖'
+];
+
+function createBoard() {
+    for (let i = 0; i < 64; i++) {
+        const square = document.createElement('div');
+        square.classList.add('square');
+        square.classList.add((Math.floor(i / 8) + i) % 2 === 0 ? 'white' : 'black');
+        square.dataset.index = i;
+
+        const piece = initialPosition[i];
+        if (piece) {
+            square.textContent = piece;
+        }
+
+        square.addEventListener('click', () => handleSquareClick(i));
+        chessboard.appendChild(square);
+    }
+}
+
+function handleSquareClick(index) {
+    const selectedPiece = document.querySelector('.selected');
+
+    if (selectedPiece) {
+        // Movimiento de la pieza
+        const targetSquare = chessboard.children[index];
+        const capturedPiece = targetSquare.textContent;
+
+        if (capturedPiece) {
+            updateScore(capturedPiece);
+        }
+
+        targetSquare.textContent = selectedPiece.textContent; // Mover pieza
+        selectedPiece.textContent = ''; // Limpiar pieza anterior
+        selectedPiece.classList.remove('selected');
+
+        clearInterval(interval); // Detener el cronómetro
+        switchPlayer();
+
+        return;
+    }
+
+    const piece = chessboard.children[index].textContent;
+
+    if (piece && (currentPlayer === 'white' && piece.charCodeAt(0) >= 9812 && piece.charCodeAt(0) <= 9817) ||
+                 (currentPlayer === 'black' && piece.charCodeAt(0) >= 9818 && piece.charCodeAt(0) <= 9823)) {
+        chessboard.children[index].classList.add('selected');
+        showPossibleMoves(index);
+
+        startTimer();
+    }
+}
+
+function showPossibleMoves(index) {
+   // Aquí puedes implementar la lógica para mostrar los movimientos posibles de la pieza seleccionada.
+   // Por simplicidad, no se implementa en este ejemplo.
+}
+
+function switchPlayer() {
+   currentPlayer = currentPlayer === 'white' ? 'black' : 'white';
+   timeElapsed = 0; // Reiniciar tiempo
+   timerDisplay.textContent = timeElapsed; // Actualizar visualmente
+
+   startTimer();
+}
+
+function startTimer() {
+   clearInterval(interval);
+   interval = setInterval(() => {
+       timeElapsed++;
+       timerDisplay.textContent = timeElapsed;
+   }, 1000);
+}
+
+function updateScore(capturedPiece) {
+   if (capturedPiece.charCodeAt(0) >= 9812 && capturedPiece.charCodeAt(0) <= 9817) { // Piezas negras
+       blackScore++;
+       blackScoreDisplay.textContent = blackScore;
+   } else if (capturedPiece.charCodeAt(0) >= 9818 && capturedPiece.charCodeAt(0) <= 9823) { // Piezas blancas
+       whiteScore++;
+       whiteScoreDisplay.textContent = whiteScore;
+   }
+}
+
+createBoard();
